@@ -1,49 +1,46 @@
 cmake_minimum_required(VERSION 3.16)
-project(example)
+project(TemplateGLFW)
 
-list(PREPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake)
+# 基本設定
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
+add_compile_options(-Wno-volatile)
 
-# Libigl
-include(libigl)
+# ソースファイルの収集
+file(GLOB SOURCES src/*.cpp src/*.h src/*.hpp src/*.glsl)
 
-# Enable the target igl::glfw
-igl_include(glfw)
-# Other modules you could enable
-#igl_include(embree)
-#igl_include(imgui)
-#igl_include(opengl)
-#igl_include(stb)
-#igl_include(predicates)
-#igl_include(xml)
-#igl_include(copyleft cgal)
-#igl_include(copyleft comiso)
-#igl_include(copyleft core)
-#igl_include(copyleft cork)
-#igl_include(copyleft tetgen)
-#igl_include(restricted matlab)
-#igl_include(restricted mosek)
-#igl_include(restricted triangle)
+# 必須パッケージ
+find_package(OpenGL REQUIRED)
+find_package(GLEW REQUIRED)
+find_package(Eigen3 3.3 REQUIRED NO_MODULE)
+find_package(glfw3 REQUIRED)
 
-# Add your project files
-file(GLOB SRC_FILES *.cpp)
-add_executable(${PROJECT_NAME} ${SRC_FILES})
+# OpenCVパッケージ（必要な場合のみ）
+find_package(OpenCV REQUIRED)
+set(OpenCV_STATIC OFF)
 
-# Link igl (and the glfw module) to your project
-target_link_libraries(${PROJECT_NAME} PUBLIC 
-  igl::glfw
-  ## Other modules you could link to
-  # igl::embree
-  # igl::imgui
-  # igl::opengl
-  # igl::stb
-  # igl::predicates
-  # igl::xml
-  # igl_copyleft::cgal
-  # igl_copyleft::comiso
-  # igl_copyleft::core
-  # igl_copyleft::cork
-  # igl_copyleft::tetgen
-  # igl_restricted::matlab
-  # igl_restricted::mosek
-  # igl_restricted::triangle
-  )
+# インクルードディレクトリの設定
+include_directories(
+    ${GLEW_INCLUDE_DIRS}
+    ${GLFW_INCLUDE_DIRS}
+    ${OpenCV_INCLUDE_DIRS}
+    ${OPENGL_INCLUDE_DIR}
+)
+
+# リンクディレクトリの設定
+link_directories(${GLEW_LIBRARY_DIRS})
+
+# 実行ファイルの作成
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+# ライブラリのリンク
+target_link_libraries(${PROJECT_NAME} PUBLIC
+    ${OPENGL_LIBRARIES}
+    ${GLEW_LIBRARIES}
+    glfw
+    ${OpenCV_LIBS}
+    Eigen3::Eigen
+)
+
+# 実行ファイルの出力先設定
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_BINARY_DIR}/bin)
